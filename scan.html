@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أثر - التحقق من بيانات الطالب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: linear-gradient(135deg, #064e3b, #022c22, #111827); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: #ffffff; width: 100%; max-width: 450px; padding: 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; border-top: 5px solid #10b981; }
+        .logo-title { font-size: 24px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 5px; }
+        .subtitle { font-size: 13px; color: #d97706; text-align: center; margin-bottom: 25px; font-weight: 600; }
+        .info-group { background: #f9fafb; padding: 12px 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
+        .info-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 3px; }
+        .info-value { font-size: 16px; color: #1f2937; font-weight: 700; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-top: 5px; }
+        .status-ok { background: #d1fae5; color: #065f46; }
+        .error-card { background: #fef2f2; border: 2px solid #fecaca; text-align: center; padding: 25px; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <h1 class="logo-title">منصة أثر التعليمية</h1>
+        <p class="subtitle">نتيجة التحقق من الكارنيه والكود</p>
+
+        <div id="studentDetails">
+            <!-- سيتم تعبئة البيانات تلقائياً هنا عبر الكود -->
+        </div>
+    </div>
+
+    <script>
+        // قراءة كود الطالب من رابط الصفحة (URL Parameters)
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentCode = urlParams.get('code');
+
+        const container = document.getElementById('studentDetails');
+
+        if (!studentCode) {
+            container.innerHTML = `
+                <div class="error-card">
+                    <h3 style="color: #dc2626; margin-bottom: 8px;">خطأ في الرابط</h3>
+                    <p style="font-size: 14px; color: #4b5563;">لم يتم تحديد كود الطالب في الرابط بشكل صحيح.</p>
+                </div>
+            `;
+        } else {
+            // جلب بيانات الطلاب المخزنة محلياً
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            let foundStudent = students.find(s => s.code === studentCode);
+
+            if (foundStudent) {
+                container.innerHTML = `
+                    <div class="info-group">
+                        <div class="info-label">اسم الطالب الثلاثي:</div>
+                        <div class="info-value">${foundStudent.name}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">الصف الدراسي:</div>
+                        <div class="info-value">${foundStudent.grade}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">المركز / المحافظة:</div>
+                        <div class="info-value">${foundStudent.center}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">رقم الهاتف:</div>
+                        <div class="info-value">${foundStudent.phone}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">كود التفعيل:</div>
+                        <div class="info-value" style="color: #047857;">${foundStudent.code}</div>
+                    </div>
+                    <div class="info-group" style="text-align: center; background: #f0fdf4;">
+                        <div class="info-label">حالة الاشتراك / الدفع:</div>
+                        <span class="status-badge status-ok">${foundStudent.status || 'مسجل ومعتمد'}</span>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="error-card">
+                        <h3 style="color: #dc2626; margin-bottom: 8px;">عذراً، الكود غير غيّر موجود!</h3>
+                        <p style="font-size: 14px; color: #4b5563;">هذا الكود (${studentCode}) غير مسجل في قاعدة بيانات المنصة.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أثر التعليمية - تسجيل الطلاب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- مكتبة توليد الـ QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: linear-gradient(135deg, #064e3b, #022c22, #111827); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: #ffffff; width: 100%; max-width: 500px; padding: 35px 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; border-top: 5px solid #d97706; }
+        .logo-title { font-size: 26px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 5px; }
+        .subtitle { font-size: 13px; color: #d97706; text-align: center; margin-bottom: 25px; font-weight: 600; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 11px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.3s ease; }
+        input:focus, select:focus { border-color: #059669; }
+        .note { font-size: 11px; color: #dc2626; margin-top: 4px; }
+        button { width: 100%; background: linear-gradient(135deg, #059669, #047857); color: white; padding: 13px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.3s ease; margin-top: 10px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
+        button:hover { opacity: 0.9; }
+        #resultCard { display: none; text-align: center; padding: 25px 20px; background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; margin-top: 15px; }
+        .success-icon { font-size: 40px; color: #059669; margin-bottom: 10px; }
+        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="logo-title">منصة أثر التعليمية</h1>
+        <p class="subtitle">بوابة تسجيل الطلاب وتأكيد الاشتراكات والمبادرات</p>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">الاسم الثلاثي:</label>
+                <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
+            </div>
+            <div class="form-group">
+                <label for="grade">الصف الدراسي:</label>
+                <input type="text" id="grade" placeholder="مثال: الصف الثالث الثانوي" required>
+            </div>
+            <div class="form-group">
+                <label for="center">المركز / المحافظة:</label>
+                <input type="text" id="center" placeholder="مثال: أخميم - سوهاج" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">رقم الهاتف (الواتساب):</label>
+                <input type="tel" id="phone" placeholder="01XXXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label for="studentCase">الحالة المالية / الاشتراك:</label>
+                <select id="studentCase" required onchange="toggleExemptField()">
+                    <option value="">اختر الحالة</option>
+                    <option value="muktader">طالب مقتدر (الرسوم الكاملة)</option>
+                    <option value="exempt">طالب غير مقتدر (مستفيد من الخصم / دعم)</option>
+                </select>
+            </div>
+
+            <!-- قسم بيانات الدفع الأساسي -->
+            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label for="paymentMethod">طريقة الدفع:</label>
+                    <select id="paymentMethod" required>
+                        <option value="">اختر طريقة الدفع</option>
+                        <option value="Vodafone Cash">فودافون كاش</option>
+                        <option value="InstaPay">إنستا باي (InstaPay)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transactionId">رقم التحويل (الرقم الذي تم التحويل منه):</label>
+                    <input type="text" id="transactionId" placeholder="اكتب رقم العملية أو الرقم المحول منه" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="receiptImage">صورة إيصال الدفع (سكرين شوت):</label>
+                    <input type="file" id="receiptImage" accept="image/*" required>
+                </div>
+            </div>
+
+            <!-- قسم إثبات الحالة -->
+            <div id="exemptSection" style="display: none; background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 15px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="proofImage">صورة إثبات الحالة (مستند رسمي / شهادة وفاة، إلخ):</label>
+                    <input type="file" id="proofImage" accept="image/*">
+                    <p class="note">يرجى إرفاق صورة واضحة للمستند لمراجعته من الإدارة وقبول الخصم</p>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">تأكيد وإرسال البيانات</button>
+        </form>
+
+        <div id="resultCard">
+            <div class="success-icon">✅</div>
+            <h3 style="color: #065f46; margin-bottom: 8px;">تم تسجيل بياناتك بنجاح!</h3>
+            <p style="font-size: 13px; color: #4b5563; line-height: 1.5; margin-bottom: 10px;">
+                احتفظ بهذا الكود أو التقط صورة (Screenshot) لـ QR Code لعرضه عند المعلم أو المكتبة للحصول على الخصم:
+            </p>
+            <!-- مكان عرض الـ QR Code -->
+            <div id="qrcode"></div>
+            <p id="studentCodeDisplay" style="font-weight: bold; color: #064e3b; font-size: 15px; margin-top: 8px;"></p>
+        </div>
+    </div>
+
+    <script>
+    function toggleExemptField() {
+        var studentCase = document.getElementById('studentCase').value;
+        var exemptSec = document.getElementById('exemptSection');
+        var proofInput = document.getElementById('proofImage');
+
+        if (studentCase === 'exempt') {
+            exemptSec.style.display = 'block';
+            proofInput.required = true;
+        } else {
+            exemptSec.style.display = 'none';
+            proofInput.required = false;
+        }
+    }
+
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var name = document.getElementById('name').value;
+        var grade = document.getElementById('grade').value;
+        var center = document.getElementById('center').value;
+        var phone = document.getElementById('phone').value;
+        var studentCase = document.getElementById('studentCase').value;
+        var paymentMethod = document.getElementById('paymentMethod').value;
+        var transactionId = document.getElementById('transactionId').value;
+        var receiptFile = document.getElementById('receiptImage').files[0];
+        var randomCode = "ATHAR-" + Math.floor(1000 + Math.random() * 9000);
+        var statusText = studentCase === 'exempt' ? 'غير مقتدر / بانتظار مراجعة الإثبات' : 'مقتدر / قيد المراجعة';
+
+        var reader = new FileReader();
+        reader.readAsDataURL(receiptFile);
+        reader.onload = function () {
+            var dataToSend = {
+                name: name, grade: grade, center: center, phone: phone,
+                studentCase: studentCase, paymentMethod: paymentMethod,
+                transactionId: transactionId, fileImage: reader.result,
+                code: randomCode, status: statusText // ظبطنا الكود والحالة عشان يتوافقوا مع اللوحة وصفحة الـ Scan
+            };
+
+            // حفظ الطالب محلياً في المتصفح عشان صفحة الـ Scan ولوحة التحكم تقراهم فوراً
+            let existingStudents = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            existingStudents.push(dataToSend);
+            localStorage.setItem('atharStudents', JSON.stringify(existingStudents));
+
+            var url = "https://script.google.com/macros/s/AKfycbw78cx2hSxbjETWB6icrJ_ijh_8Lv6G29iS_ASZIqBaLbyjx28I4u6GOn_OJYErW16B7w/exec";
+
+            document.getElementById('submitBtn').innerText = "جاري الإرسال...";
+            document.getElementById('submitBtn').disabled = true;
+
+            // إرسال البيانات لجوجل شيت بدون حجب
+            fetch(url, {
+                method: "POST", mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(() => {
+                // إخفاء الفورم وإظهار كارت النجاح والـ QR Code
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('resultCard').style.display = 'block';
+
+                // عرض الكود النصي
+                document.getElementById('studentCodeDisplay').innerText = "كود الطالب: " + randomCode;
+
+                // رابط صفحة التحقق اللي المدرس هيعملها Scan (مربوطة بـ scan.html وكود الطالب)
+                // لو رفعتي الموقع على استضافة حقيقية استبدلي رابط الملف برابط الموقع الحقيقي
+                var scanUrl = window.location.origin + window.location.pathname.replace('rigister.html', 'scan.html') + "?code=" + randomCode;
+
+                // توليد الـ QR Code أوتوماتيك
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), {
+                    text: scanUrl,
+                    width: 140,
+                    height: 140,
+                    colorDark : "#064e3b",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            })
+            .catch(error => {
+                console.error('Error!', error);
+                alert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.");
+                document.getElementById('submitBtn').innerText = "تأكيد وإرسال البيانات";
+                document.getElementById('submitBtn').disabled = false;
+            });
+        };
+    });
+    </script>
+</body>
+</html>

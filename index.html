@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أثر التعليمية - لوحة التحكم الإدارية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: #f3f4f6; color: #1f2937; padding: 20px; }
+        .container { max-width: 1250px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 25px; }
+        .logo-title { font-size: 22px; font-weight: 700; color: #064e3b; }
+        .actions-bar { display: flex; gap: 10px; }
+        .btn { background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; }
+        .btn:hover { background: #047857; }
+        .btn-whatsapp { background: #25d366; }
+        .btn-whatsapp:hover { background: #1ebe5d; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px 20px; border-radius: 12px; text-align: center; }
+        .stat-card h3 { font-size: 14px; color: #6b7280; margin-bottom: 5px; }
+        .stat-card .number { font-size: 24px; font-weight: 700; color: #064e3b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; vertical-align: middle; }
+        th { background: #f0fdf4; color: #065f46; font-weight: 700; }
+        .status-pending { background: #fef3c7; color: #b45309; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .status-approved { background: #d1fae5; color: #065f46; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .qr-box { width: 60px; height: 60px; cursor: pointer; }
+        .receipt-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; transition: 0.2s; }
+        .receipt-img:hover { transform: scale(2.2); }
+        .btn-approve { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .btn-approve:hover { background: #059669; }
+        .btn-download-qr { background: #3b82f6; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .btn-download-qr:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo-title">لوحة تحكم منصة أثر التعليمية (إدارة الصعيد)</div>
+            <div class="actions-bar">
+                <a href="rigister.html" target="_blank" class="btn">تسجيل طالب جديد</a>
+                <button class="btn btn-whatsapp" onclick="sendWhatsAppReport()">إرسال التقارير للمدير 📱</button>
+            </div>
+        </header>
+
+        <!-- الإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>إجمالي الطلاب المسجلين</h3>
+                <div class="number" id="totalStudents">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>الحالات المعتمدة (مدفوع)</h3>
+                <div class="number" id="approvedStudents">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>حالات قيد المراجعة</h3>
+                <div class="number" id="pendingStudents">0</div>
+            </div>
+        </div>
+
+        <!-- جدول الطلاب -->
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم الطالب</th>
+                    <th>الصف الدراسي</th>
+                    <th>رقم الهاتف</th>
+                    <th>إيصال الدفع</th>
+                    <th>كود التفعيل</th>
+                    <th>باركود الكارنيه (QR)</th>
+                    <th>حالة الدفع</th>
+                    <th>إجراءات الإدارة</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+                <!-- يتم تعبئة البيانات تلقائياً -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadDashboard() {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            
+            // بيانات تجريبية لو الجدول فاضي
+            if (students.length === 0) {
+                students = [
+                    { name: 'محمد أحمد محمود', grade: 'الصف الأول الثانوي', phone: '01012345678', code: 'ATHAR-5833', status: 'قيد المراجعة', fileImage: '' },
+                    { name: 'فاطمة علي حسن', grade: 'الصف الثاني الثانوي', phone: '01198765432', code: 'ATHAR-1495', status: 'قيد المراجعة', fileImage: '' }
+                ];
+                localStorage.setItem('atharStudents', JSON.stringify(students));
+            }
+
+            let tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            let approvedCount = 0;
+            let pendingCount = 0;
+
+            students.forEach((student, index) => {
+                if (student.status === 'تم الدفع ومعتمد ✓') approvedCount++;
+                else pendingCount++;
+
+                let receiptContent = student.fileImage ? 
+                    `<img src="${student.fileImage}" class="receipt-img" onclick="window.open('${student.fileImage}', '_blank')" title="اضغط لتكبير الصورة">` : 
+                    '<span style="color: #9ca3af; font-size: 11px;">بدون إيصال</span>';
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.grade}</td>
+                    <td>${student.phone}</td>
+                    <td>${receiptContent}</td>
+                    <td><span style="color: #047857; font-weight: bold;">${student.code}</span></td>
+                    <td>
+                        <div class="qr-wrapper">
+                            <div class="qr-box" id="qr_${index}" title="اضغط لفتح صفحة التحقق" onclick="openScanPage('${student.code}')"></div>
+                            <button class="btn-download-qr" onclick="downloadQR(${index}, '${student.code}')">📥 تحميل الباركود</button>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="${student.status === 'تم الدفع ومعتمد ✓' ? 'status-approved' : 'status-pending'}">
+                            ${student.status || 'قيد المراجعة'}
+                        </span>
+                    </td>
+                    <td>
+                        ${student.status !== 'تم الدفع ومعتمد ✓' ? `<button class="btn-approve" onclick="approveStudent(${index})">تأكيد الدفع</button>` : '<span style="color: #059669; font-weight: bold; font-size: 12px;">معتمد ✓</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // توليد الباركود لكل طالب
+                setTimeout(() => {
+                    let qrContainer = document.getElementById(`qr_${index}`);
+                    if (qrContainer && qrContainer.childElementCount === 0) {
+                        new QRCode(qrContainer, {
+                            text: window.location.origin + window.location.pathname.replace('index.html', '') + `scan.html?code=${student.code}`,
+                            width: 60,
+                            height: 60,
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                    }
+                }, 100);
+            });
+
+            document.getElementById('totalStudents').innerText = students.length;
+            document.getElementById('approvedStudents').innerText = approvedCount;
+            document.getElementById('pendingStudents').innerText = pendingCount;
+        }
+
+        // دالة تأكيد الدفع وقبول الطالب
+        function approveStudent(index) {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            students[index].status = 'تم الدفع ومعتمد ✓';
+            localStorage.setItem('atharStudents', JSON.stringify(students));
+            loadDashboard();
+        }
+
+        // فتح صفحة التحقق عند الضغط على الباركود
+        function openScanPage(code) {
+            window.open(`scan.html?code=${code}`, '_blank');
+        }
+
+        // دالة تحميل صورة الباركود لتوضع على الكارنيه
+        function downloadQR(index, code) {
+            let qrElement = document.getElementById(`qr_${index}`);
+            let img = qrElement.querySelector('img');
+            let canvas = qrElement.querySelector('canvas');
+            
+            let imageUrl = '';
+            if (img && img.src) {
+                imageUrl = img.src;
+            } else if (canvas) {
+                imageUrl = canvas.toDataURL("image/png");
+            }
+
+            if (imageUrl) {
+                let link = document.createElement('a');
+                link.href = imageUrl;
+                link.download = `QRCode_${code}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('جاري توليد الباركود، حاول مرة أخرى بعد ثانية.');
+            }
+        }
+
+        // إرسال تقرير إداري فوري عبر الواتساب للمدير
+        function sendWhatsAppReport() {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            let total = students.length;
+            let approved = students.filter(s => s.status === 'تم الدفع ومعتمد ✓').length;
+            let pending = total - approved;
+
+            let reportText = `📊 *تقرير منصة أثر التعليمية* %0A` +
+                             `-----------------------------------%0A` +
+                             `📌 إجمالي المسجلين: ${total}%0A` +
+                             `✅ الحالات المعتمدة: ${approved}%0A` +
+                             `⏳ قيد المراجعة: ${pending}%0A` +
+                             `-----------------------------------%0A` +
+                             `🚀 النظام يعمل بشكل ممتاز وجاهز للمتابعة.`;
+
+            window.open(`https://wa.me/?text=${reportText}`, '_blank');
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>
