@@ -29,15 +29,11 @@
         .status-approved { background: #d1fae5; color: #065f46; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
         .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .qr-box { width: 60px; height: 60px; cursor: pointer; }
-        .receipt-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; transition: 0.2s; }
-        .receipt-img:hover { transform: scale(2.2); }
+        .receipt-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; }
         .action-btns { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
         .btn-approve { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-approve:hover { background: #059669; }
         .btn-delete { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-delete:hover { background: #dc2626; }
         .btn-download-qr { background: #3b82f6; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .btn-download-qr:hover { background: #2563eb; }
     </style>
 </head>
 <body>
@@ -51,41 +47,37 @@
             </div>
         </header>
 
-        <!-- الإحصائيات -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي الطلاب المسجلين</h3>
                 <div class="number" id="totalStudents">0</div>
             </div>
             <div class="stat-card">
-                <h3>الحالات المعتمدة (مدفوع)</h3>
+                <h3>الحالات المعتمدة</h3>
                 <div class="number" id="approvedStudents">0</div>
             </div>
             <div class="stat-card">
-                <h3>حالات قيد المراجعة</h3>
+                <h3>قيد المراجعة</h3>
                 <div class="number" id="pendingStudents">0</div>
             </div>
         </div>
 
-        <!-- جدول الطلاب -->
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th>اسم الطالب</th>
                         <th>الصف الدراسي</th>
-                        <th>المركز / الحالة</th>
+                        <th>المركز</th>
                         <th>رقم الهاتف</th>
-                        <th>إيصال الدفع</th>
+                        <th>الإيصال</th>
                         <th>كود التفعيل</th>
-                        <th>باركود الكارنيه (QR)</th>
-                        <th>حالة الدفع</th>
-                        <th>إجراءات الإدارة</th>
+                        <th>باركود الكارنيه للطباعة</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody id="studentsTableBody">
-                    <!-- يتم تعبئة البيانات تلقائياً -->
-                </tbody>
+                <tbody id="studentsTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -93,7 +85,6 @@
     <script>
         function loadDashboard() {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
-
             let tbody = document.getElementById('studentsTableBody');
             tbody.innerHTML = '';
 
@@ -105,53 +96,47 @@
                 if (isApproved) approvedCount++;
                 else pendingCount++;
 
-                // معالجة عرض وتفتيح صورة الإيصال بشكل صحيح ومضمون
-                let receiptContent = '<span style="color: #9ca3af; font-size: 11px;">بدون إيصال</span>';
-                if (student.fileImage) {
-                    receiptContent = `<img src="${student.fileImage}" class="receipt-img" onclick="openImageModal('${student.fileImage}')" title="اضغط لتكبير الصورة">`;
-                } else if (student.receipt) {
-                    receiptContent = `<img src="${student.receipt}" class="receipt-img" onclick="openImageModal('${student.receipt}')" title="اضغط لتكبير الصورة">`;
-                }
+                let receiptContent = student.fileImage ? `<img src="${student.fileImage}" class="receipt-img" onclick="openModal('${student.fileImage}')">` : 'بدون';
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${student.name}</strong></td>
                     <td>${student.grade}</td>
-                    <td>${student.center || 'غير محدد'}<br><small style="color: #6b7280;">${student.financialStatus || ''}</small></td>
+                    <td>${student.center || 'غير محدد'}</td>
                     <td>${student.phone}</td>
                     <td>${receiptContent}</td>
                     <td><span style="color: #047857; font-weight: bold;">${student.code}</span></td>
                     <td>
                         <div class="qr-wrapper">
-                            <div class="qr-box" id="qr_${index}" title="اضغط لفتح صفحة التحقق" onclick="openScanPage('${student.code}')"></div>
-                            <button class="btn-download-qr" onclick="downloadQR(${index}, '${student.code}')">📥 تحميل الباركود</button>
+                            <div class="qr-box" id="qr_${index}"></div>
+                            <button class="btn-download-qr" onclick="downloadQR(${index}, '${student.code}')">📥 تحميل للطباعة</button>
                         </div>
                     </td>
-                    <td>
-                        <span class="${isApproved ? 'status-approved' : 'status-pending'}">
-                            ${student.status || 'قيد المراجعة'}
-                        </span>
-                    </td>
+                    <td><span class="${isApproved ? 'status-approved' : 'status-pending'}">${student.status || 'قيد المراجعة'}</span></td>
                     <td>
                         <div class="action-btns">
-                            ${!isApproved ? `<button class="btn-approve" onclick="approveStudent(${index})">تأكيد</button>` : '<span style="color: #059669; font-weight: bold; font-size: 11px;">معتمد</span>'}
-                            <button class="btn-delete" onclick="deleteStudent(${index})">حذف</button>
+                            ${!isApproved ? `<button class="btn-approve" onclick="approve(${index})">تأكيد</button>` : '<span style="color:#059669;font-weight:bold;font-size:11px;">معتمد</span>'}
+                            <button class="btn-delete" onclick="del(${index})">حذف</button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
 
-                // توليد الباركود لكل طالب
+                // توليد باركود نظيف وسريع برابط الكود فقط
                 setTimeout(() => {
                     let qrContainer = document.getElementById(`qr_${index}`);
                     if (qrContainer && qrContainer.childElementCount === 0) {
-                        let scanUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + `scan.html?code=${student.code}`;
-                        new QRCode(qrContainer, {
+                        let baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
+                        let scanUrl = `${baseUrl}scan.html?code=${student.code}`;
+
+                        let qr = new QRCode(qrContainer, {
                             text: scanUrl,
                             width: 60,
                             height: 60,
-                            correctLevel: QRCode.CorrectLevel.H
+                            correctLevel: QRCode.CorrectLevel.M
                         });
+
+                        qrContainer.onclick = () => window.open(scanUrl, '_blank');
                     }
                 }, 100);
             });
@@ -161,63 +146,42 @@
             document.getElementById('pendingStudents').innerText = pendingCount;
         }
 
-        // دالة تأكيد الدفع وقبول الطالب مع تسجيل تاريخ الاعتماد الفعلي لتشغيل العداد
-        function approveStudent(index) {
+        function approve(index) {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             students[index].status = 'تم الدفع ومعتمد ✓';
             students[index].isApproved = true;
-            students[index].approvalDate = new Date().toISOString(); 
+            students[index].approvalDate = new Date().toISOString();
             localStorage.setItem('atharStudents', JSON.stringify(students));
             loadDashboard();
         }
 
-        // دالة فتح صورة الإيصال في تبويب جديد بشكل مضمون
-        function openImageModal(imgSrc) {
-            let win = window.open();
-            win.document.write(`<html dir="rtl"><head><title>إيصال الدفع</title></head><body style="background:#111;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${imgSrc}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;" /></body></html>`);
-        }
-
-        // دالة حذف الطالب من اللوحة
-        function deleteStudent(index) {
-            if (confirm("هل أنت متأكد من رغبتك في حذف هذا الطالب نهائياً من سجلات المبادرة؟")) {
-                let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+        function del(index) {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            if (confirm("هل أنت متأكد من حذف هذا الطالب؟")) {
                 students.splice(index, 1);
                 localStorage.setItem('atharStudents', JSON.stringify(students));
                 loadDashboard();
             }
         }
 
-        // فتح صفحة التحقق عند الضغط على الباركود
-        function openScanPage(code) {
-            window.open(`scan.html?code=${code}`, '_blank');
+        function openModal(src) {
+            let win = window.open();
+            win.document.write(`<body style="background:#000;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${src}" style="max-width:100%;max-height:100%;"></body>`);
         }
 
-        // دالة تحميل صورة الباركود لتوضع على الكارنيه
         function downloadQR(index, code) {
             let qrElement = document.getElementById(`qr_${index}`);
             let img = qrElement.querySelector('img');
             let canvas = qrElement.querySelector('canvas');
-            
-            let imageUrl = '';
-            if (img && img.src) {
-                imageUrl = img.src;
-            } else if (canvas) {
-                imageUrl = canvas.toDataURL("image/png");
-            }
-
-            if (imageUrl) {
-                let link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = `QRCode_${code}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                alert('جاري توليد الباركود، حاول مرة أخرى بعد ثانية.');
+            let url = img ? img.src : (canvas ? canvas.toDataURL("image/png") : '');
+            if(url) {
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = `Card_QR_${code}.png`;
+                a.click();
             }
         }
 
-        // إرسال تقرير إداري فوري عبر الواتساب للمدير
         function sendWhatsAppReport() {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             let total = students.length;
@@ -230,7 +194,7 @@
                              `✅ الحالات المعتمدة: ${approved}%0A` +
                              `⏳ قيد المراجعة: ${pending}%0A` +
                              `-----------------------------------%0A` +
-                             `🚀 النظام يعمل بشكل ممتاز وجاهز للمتابعة.`;
+                             `🚀 النظام يعمل بانتظام.`;
 
             window.open(`https://wa.me/?text=${reportText}`, '_blank');
         }
