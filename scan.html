@@ -18,6 +18,7 @@
         .status-valid { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
         .status-warning { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; animation: pulse 1.5s infinite; }
         .status-expired { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .status-pending { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         
         @keyframes pulse {
             0% { opacity: 1; }
@@ -37,7 +38,7 @@
             <div class="info-group">الصف الدراسي: <span id="sGrade">-</span></div>
             <div class="info-group">المركز / المحافظة: <span id="sCenter">-</span></div>
             <div class="info-group">كود التفعيل: <span id="sCode">-</span></div>
-            <div class="info-group">تاريخ التسجيل: <span id="sDate">-</span></div>
+            <div class="info-group">تاريخ الاعتماد: <span id="sDate">-</span></div>
             <div class="info-group">المتبقي من الاشتراك: <span id="sDaysLeft">-</span></div>
             
             <div id="statusAlert" class="status-badge">جاري التحقق من الحالة...</div>
@@ -57,41 +58,50 @@
         let container = document.getElementById('cardContainer');
 
         if (!student) {
-            container.innerHTML = `<div class="error-msg">❌ عذراً، كود الطالب غير مسجل أو غير موالٍ لقواعد البيانات في المنصة.</div>`;
+            container.innerHTML = `<div class="error-msg">❌ عذراً، كود الطالب غير مسجل أو غير متوالٍ لقواعد البيانات في المنصة.</div>`;
         } else {
             document.getElementById('sName').innerText = student.name;
             document.getElementById('sGrade').innerText = student.grade;
             document.getElementById('sCenter').innerText = student.center || 'غير محدد';
             document.getElementById('sCode').innerText = student.code;
 
-            // حساب الأيام منذ تاريخ التسجيل (مدة الصلاحية 30 يوماً)
-            let regDate = student.registrationDate ? new Date(student.registrationDate) : new Date();
-            let currentDate = new Date();
-            let diffTime = currentDate - regDate;
-            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            let daysLeft = 30 - diffDays;
-
-            let formattedDate = regDate.toLocaleDateString('ar-EG');
-            document.getElementById('sDate').innerText = formattedDate;
-
             let alertBox = document.getElementById('statusAlert');
             let daysLeftSpan = document.getElementById('sDaysLeft');
 
-            if (daysLeft > 3) {
-                daysLeftSpan.innerText = daysLeft + " يوم متبقي";
-                daysLeftSpan.style.color = "#059669";
-                alertBox.className = "status-badge status-valid";
-                alertBox.innerText = "✅ اشتراك الطالب ساري ومفعل بنجاح";
-            } else if (daysLeft >= 0 && daysLeft <= 3) {
-                daysLeftSpan.innerText = daysLeft + " أيام متبقية (ينتهي قريباً!)";
-                daysLeftSpan.style.color = "#dc2626";
-                alertBox.className = "status-badge status-warning";
-                alertBox.innerText = `⚠️ تنبيه هام: متبقي ${daysLeft} أيام فقط على انتهاء اشتراك الطالب، يرجى التجديد فوراً!`;
+            // التحقق مما إذا تم اعتماد الطالب من قبل الإدارة أم لا
+            if (!student.isApproved || !student.approvalDate) {
+                document.getElementById('sDate').innerText = "قيد المراجعة";
+                daysLeftSpan.innerText = "لم يبدأ العداد بعد";
+                daysLeftSpan.style.color = "#d97706";
+                alertBox.className = "status-badge status-pending";
+                alertBox.innerText = "⏳ تنبيه: الطالب في انتظار المراجعة واعتماد الإدارة لتفعيل الاشتراك.";
             } else {
-                daysLeftSpan.innerText = "انتهت الصلاحية";
-                daysLeftSpan.style.color = "#991b1b";
-                alertBox.className = "status-badge status-expired";
-                alertBox.innerText = "❌ انتهت فترة الاشتراك (أكثر من 30 يوماً)، يتطلب التجديد!";
+                // حساب الأيام منذ تاريخ الاعتماد (مدة الصلاحية 30 يوماً)
+                let approvalDate = new Date(student.approvalDate);
+                let currentDate = new Date();
+                let diffTime = currentDate - approvalDate;
+                let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                let daysLeft = 30 - diffDays;
+
+                let formattedDate = approvalDate.toLocaleDateString('ar-EG');
+                document.getElementById('sDate').innerText = formattedDate;
+
+                if (daysLeft > 3) {
+                    daysLeftSpan.innerText = daysLeft + " يوم متبقي";
+                    daysLeftSpan.style.color = "#059669";
+                    alertBox.className = "status-badge status-valid";
+                    alertBox.innerText = "✅ اشتراك الطالب ساري ومفعل بنجاح";
+                } else if (daysLeft >= 0 && daysLeft <= 3) {
+                    daysLeftSpan.innerText = daysLeft + " أيام متبقية (ينتهي قريباً!)";
+                    daysLeftSpan.style.color = "#dc2626";
+                    alertBox.className = "status-badge status-warning";
+                    alertBox.innerText = `⚠️ تنبيه هام: متبقي ${daysLeft} أيام فقط على انتهاء اشتراك الطالب، يرجى التجديد فوراً!`;
+                } else {
+                    daysLeftSpan.innerText = "انتهت الصلاحية";
+                    daysLeftSpan.style.color = "#991b1b";
+                    alertBox.className = "status-badge status-expired";
+                    alertBox.innerText = "❌ انتهت فترة الاشتراك (أكثر من 30 يوماً)، يتطلب التجديد!";
+                }
             }
         }
     </script>
