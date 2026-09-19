@@ -51,8 +51,8 @@
                 <label for="studentCase">الحالة المالية / الاشتراك:</label>
                 <select id="studentCase" required onchange="toggleExemptField()">
                     <option value="">اختر الحالة</option>
-                    <option value="muktader">طالب مقتدر (الرسوم الكاملة)</option>
-                    <option value="exempt">طالب غير مقتدر (مستفيد من الخصم / دعم)</option>
+                    <option value="طالب مقتدر">طالب مقتدر</option>
+                    <option value="طالب غير مقتدر">طالب غير مقتدر</option>
                 </select>
             </div>
 
@@ -81,7 +81,7 @@
                 <div class="form-group" style="margin-bottom: 0;">
                     <label for="proofImage">صورة إثبات الحالة (مستند رسمي / شهادة وفاة، إلخ):</label>
                     <input type="file" id="proofImage" accept="image/*">
-                    <p class="note">يرجى إرفاق صورة واضحة للمستند لمراجعته من الإدارة وقبول الخصم</p>
+                    <p class="note">يرجى إرفاق صورة واضحة للمستند لمراجعته من الإدارة وقبول الحالة</p>
                 </div>
             </div>
 
@@ -92,7 +92,7 @@
             <div class="success-icon">✅</div>
             <h3 style="color: #065f46; margin-bottom: 8px;">تم تسجيل بياناتك بنجاح!</h3>
             <p style="font-size: 13px; color: #4b5563; line-height: 1.5; margin-bottom: 10px;">
-                احتفظ بهذا الكود أو التقط صورة (Screenshot) لـ QR Code لعرضه عند المعلم أو المكتبة للحصول على الخصم:
+                احتفظ بهذا الكود أو التقط صورة (Screenshot) لـ QR Code لعرضه عند المعلم أو المكتبة:
             </p>
             <!-- مكان عرض الـ QR Code -->
             <div id="qrcode"></div>
@@ -106,7 +106,7 @@
         var exemptSec = document.getElementById('exemptSection');
         var proofInput = document.getElementById('proofImage');
 
-        if (studentCase === 'exempt') {
+        if (studentCase === 'طالب غير مقتدر') {
             exemptSec.style.display = 'block';
             proofInput.required = true;
         } else {
@@ -126,19 +126,20 @@
         var transactionId = document.getElementById('transactionId').value;
         var receiptFile = document.getElementById('receiptImage').files[0];
         var randomCode = "ATHAR-" + Math.floor(1000 + Math.random() * 9000);
-        var statusText = studentCase === 'exempt' ? 'غير مقتدر / بانتظار مراجعة الإثبات' : 'مقتدر / قيد المراجعة';
+        var statusText = 'تم الدفع - معتمد';
 
         var reader = new FileReader();
         reader.readAsDataURL(receiptFile);
         reader.onload = function () {
             var dataToSend = {
                 name: name, grade: grade, center: center, phone: phone,
-                studentCase: studentCase, paymentMethod: paymentMethod,
+                financialStatus: studentCase, paymentMethod: paymentMethod,
                 transactionId: transactionId, fileImage: reader.result,
-                code: randomCode, status: statusText // ظبطنا الكود والحالة عشان يتوافقوا مع اللوحة وصفحة الـ Scan
+                code: randomCode, status: statusText,
+                registrationDate: new Date().toISOString() // حفظ تاريخ التسجيل لحساب الـ 30 يوماً بدقة
             };
 
-            // حفظ الطالب محلياً في المتصفح عشان صفحة الـ Scan ولوحة التحكم تقراهم فوراً
+            // حفظ الطالب محلياً في المتصفح
             let existingStudents = JSON.parse(localStorage.getItem('atharStudents')) || [];
             existingStudents.push(dataToSend);
             localStorage.setItem('atharStudents', JSON.stringify(existingStudents));
@@ -155,18 +156,13 @@
                 body: JSON.stringify(dataToSend)
             })
             .then(() => {
-                // إخفاء الفورم وإظهار كارت النجاح والـ QR Code
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('resultCard').style.display = 'block';
 
-                // عرض الكود النصي
                 document.getElementById('studentCodeDisplay').innerText = "كود الطالب: " + randomCode;
 
-                // رابط صفحة التحقق اللي المدرس هيعملها Scan (مربوطة بـ scan.html وكود الطالب)
-                // لو رفعتي الموقع على استضافة حقيقية استبدلي رابط الملف برابط الموقع الحقيقي
-                var scanUrl = window.location.origin + window.location.pathname.replace('rigister.html', 'scan.html') + "?code=" + randomCode;
+                var scanUrl = window.location.origin + window.location.pathname.replace(/register\.html|rigister\.html|index\.html/, 'scan.html') + "?code=" + randomCode;
 
-                // توليد الـ QR Code أوتوماتيك
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), {
                     text: scanUrl,

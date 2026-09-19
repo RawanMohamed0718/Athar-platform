@@ -9,11 +9,11 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background-color: #f3f4f6; color: #1f2937; padding: 20px; }
-        .container { max-width: 1250px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 25px; }
+        .container { max-width: 1300px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
         .logo-title { font-size: 22px; font-weight: 700; color: #064e3b; }
-        .actions-bar { display: flex; gap: 10px; }
-        .btn { background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; }
+        .actions-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; font-size: 14px; }
         .btn:hover { background: #047857; }
         .btn-whatsapp { background: #25d366; }
         .btn-whatsapp:hover { background: #1ebe5d; }
@@ -21,7 +21,8 @@
         .stat-card { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px 20px; border-radius: 12px; text-align: center; }
         .stat-card h3 { font-size: 14px; color: #6b7280; margin-bottom: 5px; }
         .stat-card .number { font-size: 24px; font-weight: 700; color: #064e3b; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; min-width: 900px; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; vertical-align: middle; }
         th { background: #f0fdf4; color: #065f46; font-weight: 700; }
         .status-pending { background: #fef3c7; color: #b45309; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
@@ -30,8 +31,11 @@
         .qr-box { width: 60px; height: 60px; cursor: pointer; }
         .receipt-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; transition: 0.2s; }
         .receipt-img:hover { transform: scale(2.2); }
+        .action-btns { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
         .btn-approve { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-approve:hover { background: #059669; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .btn-delete:hover { background: #dc2626; }
         .btn-download-qr { background: #3b82f6; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
         .btn-download-qr:hover { background: #2563eb; }
     </style>
@@ -64,23 +68,26 @@
         </div>
 
         <!-- جدول الطلاب -->
-        <table>
-            <thead>
-                <tr>
-                    <th>اسم الطالب</th>
-                    <th>الصف الدراسي</th>
-                    <th>رقم الهاتف</th>
-                    <th>إيصال الدفع</th>
-                    <th>كود التفعيل</th>
-                    <th>باركود الكارنيه (QR)</th>
-                    <th>حالة الدفع</th>
-                    <th>إجراءات الإدارة</th>
-                </tr>
-            </thead>
-            <tbody id="studentsTableBody">
-                <!-- يتم تعبئة البيانات تلقائياً -->
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم الطالب</th>
+                        <th>الصف الدراسي</th>
+                        <th>المركز / الحالة</th>
+                        <th>رقم الهاتف</th>
+                        <th>إيصال الدفع</th>
+                        <th>كود التفعيل</th>
+                        <th>باركود الكارنيه (QR)</th>
+                        <th>حالة الدفع</th>
+                        <th>إجراءات الإدارة</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- يتم تعبئة البيانات تلقائياً -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -90,8 +97,8 @@
             // بيانات تجريبية لو الجدول فاضي
             if (students.length === 0) {
                 students = [
-                    { name: 'محمد أحمد محمود', grade: 'الصف الأول الثانوي', phone: '01012345678', code: 'ATHAR-5833', status: 'قيد المراجعة', fileImage: '' },
-                    { name: 'فاطمة علي حسن', grade: 'الصف الثاني الثانوي', phone: '01198765432', code: 'ATHAR-1495', status: 'قيد المراجعة', fileImage: '' }
+                    { name: 'محمد أحمد محمود', grade: 'الصف الأول الثانوي', center: 'سوهاج', phone: '01012345678', financialStatus: 'طالب مقتدر', code: 'ATHAR-5833', status: 'قيد المراجعة', fileImage: '', registrationDate: new Date().toISOString() },
+                    { name: 'فاطمة علي حسن', grade: 'الصف الثاني الثانوي', center: 'أخميم', phone: '01198765432', financialStatus: 'طالب غير مقتدر', code: 'ATHAR-1495', status: 'قيد المراجعة', fileImage: '', registrationDate: new Date().toISOString() }
                 ];
                 localStorage.setItem('atharStudents', JSON.stringify(students));
             }
@@ -103,7 +110,8 @@
             let pendingCount = 0;
 
             students.forEach((student, index) => {
-                if (student.status === 'تم الدفع ومعتمد ✓') approvedCount++;
+                let isApproved = student.status === 'تم الدفع ومعتمد ✓';
+                if (isApproved) approvedCount++;
                 else pendingCount++;
 
                 let receiptContent = student.fileImage ? 
@@ -114,6 +122,7 @@
                 tr.innerHTML = `
                     <td><strong>${student.name}</strong></td>
                     <td>${student.grade}</td>
+                    <td>${student.center || 'غير محدد'}<br><small style="color: #6b7280;">${student.financialStatus || ''}</small></td>
                     <td>${student.phone}</td>
                     <td>${receiptContent}</td>
                     <td><span style="color: #047857; font-weight: bold;">${student.code}</span></td>
@@ -124,12 +133,15 @@
                         </div>
                     </td>
                     <td>
-                        <span class="${student.status === 'تم الدفع ومعتمد ✓' ? 'status-approved' : 'status-pending'}">
+                        <span class="${isApproved ? 'status-approved' : 'status-pending'}">
                             ${student.status || 'قيد المراجعة'}
                         </span>
                     </td>
                     <td>
-                        ${student.status !== 'تم الدفع ومعتمد ✓' ? `<button class="btn-approve" onclick="approveStudent(${index})">تأكيد الدفع</button>` : '<span style="color: #059669; font-weight: bold; font-size: 12px;">معتمد ✓</span>'}
+                        <div class="action-btns">
+                            ${!isApproved ? `<button class="btn-approve" onclick="approveStudent(${index})">تأكيد</button>` : '<span style="color: #059669; font-weight: bold; font-size: 11px;">معتمد</span>'}
+                            <button class="btn-delete" onclick="deleteStudent(${index})">حذف</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -138,8 +150,9 @@
                 setTimeout(() => {
                     let qrContainer = document.getElementById(`qr_${index}`);
                     if (qrContainer && qrContainer.childElementCount === 0) {
+                        let scanUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + `scan.html?code=${student.code}`;
                         new QRCode(qrContainer, {
-                            text: window.location.origin + window.location.pathname.replace('index.html', '') + `scan.html?code=${student.code}`,
+                            text: scanUrl,
                             width: 60,
                             height: 60,
                             correctLevel: QRCode.CorrectLevel.H
@@ -159,6 +172,16 @@
             students[index].status = 'تم الدفع ومعتمد ✓';
             localStorage.setItem('atharStudents', JSON.stringify(students));
             loadDashboard();
+        }
+
+        // دالة حذف الطالب من اللوحة
+        function deleteStudent(index) {
+            if (confirm("هل أنت متأكد من رغبتك في حذف هذا الطالب نهائياً من سجلات المبادرة؟")) {
+                let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+                students.splice(index, 1);
+                localStorage.setItem('atharStudents', JSON.stringify(students));
+                loadDashboard();
+            }
         }
 
         // فتح صفحة التحقق عند الضغط على الباركود

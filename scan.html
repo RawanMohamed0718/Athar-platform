@@ -3,86 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة أثر - التحقق من بيانات الطالب</title>
+    <title>منصة أثر التعليمية - التحقق من الكارنيه</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: linear-gradient(135deg, #064e3b, #022c22, #111827); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { background: #ffffff; width: 100%; max-width: 450px; padding: 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; border-top: 5px solid #10b981; }
-        .logo-title { font-size: 24px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 5px; }
-        .subtitle { font-size: 13px; color: #d97706; text-align: center; margin-bottom: 25px; font-weight: 600; }
-        .info-group { background: #f9fafb; padding: 12px 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
-        .info-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 3px; }
-        .info-value { font-size: 16px; color: #1f2937; font-weight: 700; }
-        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-top: 5px; }
-        .status-ok { background: #d1fae5; color: #065f46; }
-        .error-card { background: #fef2f2; border: 2px solid #fecaca; text-align: center; padding: 25px; border-radius: 12px; }
+        .card { background: #ffffff; width: 100%; max-width: 450px; padding: 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; position: relative; overflow: hidden; }
+        .header-title { font-size: 20px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
+        .info-group { margin-bottom: 14px; font-size: 14px; color: #374151; background: #f9fafb; padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e7eb; }
+        .info-group span { font-weight: 700; color: #059669; }
+        
+        /* حالات الإنذار والقبول */
+        .status-badge { text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 15px; }
+        .status-valid { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .status-warning { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; animation: pulse 1.5s infinite; }
+        .status-expired { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .error-msg { text-align: center; color: #dc2626; font-weight: bold; font-size: 16px; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="mainContainer">
-        <h1 class="logo-title">منصة أثر التعليمية</h1>
-        <p class="subtitle">نتيجة التحقق من الكارنيه والكود</p>
-
+    <div class="card" id="cardContainer">
+        <div class="header-title">بطاقة التحقق - منصة أثر</div>
         <div id="studentDetails">
-            <!-- سيتم تعبئة البيانات تلقائياً هنا عبر الكود -->
+            <div class="info-group">اسم الطالب: <span id="sName">-</span></div>
+            <div class="info-group">الصف الدراسي: <span id="sGrade">-</span></div>
+            <div class="info-group">المركز / المحافظة: <span id="sCenter">-</span></div>
+            <div class="info-group">كود التفعيل: <span id="sCode">-</span></div>
+            <div class="info-group">تاريخ التسجيل: <span id="sDate">-</span></div>
+            <div class="info-group">المتبقي من الاشتراك: <span id="sDaysLeft">-</span></div>
+            
+            <div id="statusAlert" class="status-badge">جاري التحقق من الحالة...</div>
         </div>
     </div>
 
     <script>
-        // قراءة كود الطالب من رابط الصفحة (URL Parameters)
-        const urlParams = new URLSearchParams(window.location.search);
-        const studentCode = urlParams.get('code');
+        function getQueryParam(param) {
+            let urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
 
-        const container = document.getElementById('studentDetails');
+        let studentCode = getQueryParam('code');
+        let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+        let student = students.find(s => s.code === studentCode);
 
-        if (!studentCode) {
-            container.innerHTML = `
-                <div class="error-card">
-                    <h3 style="color: #dc2626; margin-bottom: 8px;">خطأ في الرابط</h3>
-                    <p style="font-size: 14px; color: #4b5563;">لم يتم تحديد كود الطالب في الرابط بشكل صحيح.</p>
-                </div>
-            `;
+        let container = document.getElementById('cardContainer');
+
+        if (!student) {
+            container.innerHTML = `<div class="error-msg">❌ عذراً، كود الطالب غير مسجل أو غير موالٍ لقواعد البيانات في المنصة.</div>`;
         } else {
-            // جلب بيانات الطلاب المخزنة محلياً
-            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
-            let foundStudent = students.find(s => s.code === studentCode);
+            document.getElementById('sName').innerText = student.name;
+            document.getElementById('sGrade').innerText = student.grade;
+            document.getElementById('sCenter').innerText = student.center || 'غير محدد';
+            document.getElementById('sCode').innerText = student.code;
 
-            if (foundStudent) {
-                container.innerHTML = `
-                    <div class="info-group">
-                        <div class="info-label">اسم الطالب الثلاثي:</div>
-                        <div class="info-value">${foundStudent.name}</div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">الصف الدراسي:</div>
-                        <div class="info-value">${foundStudent.grade}</div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">المركز / المحافظة:</div>
-                        <div class="info-value">${foundStudent.center}</div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">رقم الهاتف:</div>
-                        <div class="info-value">${foundStudent.phone}</div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">كود التفعيل:</div>
-                        <div class="info-value" style="color: #047857;">${foundStudent.code}</div>
-                    </div>
-                    <div class="info-group" style="text-align: center; background: #f0fdf4;">
-                        <div class="info-label">حالة الاشتراك / الدفع:</div>
-                        <span class="status-badge status-ok">${foundStudent.status || 'مسجل ومعتمد'}</span>
-                    </div>
-                `;
+            // حساب الأيام منذ تاريخ التسجيل (مدة الصلاحية 30 يوماً)
+            let regDate = student.registrationDate ? new Date(student.registrationDate) : new Date();
+            let currentDate = new Date();
+            let diffTime = currentDate - regDate;
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            let daysLeft = 30 - diffDays;
+
+            let formattedDate = regDate.toLocaleDateString('ar-EG');
+            document.getElementById('sDate').innerText = formattedDate;
+
+            let alertBox = document.getElementById('statusAlert');
+            let daysLeftSpan = document.getElementById('sDaysLeft');
+
+            if (daysLeft > 3) {
+                daysLeftSpan.innerText = daysLeft + " يوم متبقي";
+                daysLeftSpan.style.color = "#059669";
+                alertBox.className = "status-badge status-valid";
+                alertBox.innerText = "✅ اشتراك الطالب ساري ومفعل بنجاح";
+            } else if (daysLeft >= 0 && daysLeft <= 3) {
+                daysLeftSpan.innerText = daysLeft + " أيام متبقية (ينتهي قريباً!)";
+                daysLeftSpan.style.color = "#dc2626";
+                alertBox.className = "status-badge status-warning";
+                alertBox.innerText = `⚠️ تنبيه هام: متبقي ${daysLeft} أيام فقط على انتهاء اشتراك الطالب، يرجى التجديد فوراً!`;
             } else {
-                container.innerHTML = `
-                    <div class="error-card">
-                        <h3 style="color: #dc2626; margin-bottom: 8px;">عذراً، الكود غير غيّر موجود!</h3>
-                        <p style="font-size: 14px; color: #4b5563;">هذا الكود (${studentCode}) غير مسجل في قاعدة بيانات المنصة.</p>
-                    </div>
-                `;
+                daysLeftSpan.innerText = "انتهت الصلاحية";
+                daysLeftSpan.style.color = "#991b1b";
+                alertBox.className = "status-badge status-expired";
+                alertBox.innerText = "❌ انتهت فترة الاشتراك (أكثر من 30 يوماً)، يتطلب التجديد!";
             }
         }
     </script>
