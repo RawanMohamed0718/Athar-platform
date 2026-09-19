@@ -69,7 +69,9 @@
             let daysLeftSpan = document.getElementById('sDaysLeft');
 
             // التحقق مما إذا تم اعتماد الطالب من قبل الإدارة أم لا
-            if (!student.isApproved || !student.approvalDate) {
+            let isApproved = student.status === 'تم الدفع ومعتمد ✓' || student.isApproved;
+
+            if (!isApproved || !student.approvalDate) {
                 document.getElementById('sDate').innerText = "قيد المراجعة";
                 daysLeftSpan.innerText = "لم يبدأ العداد بعد";
                 daysLeftSpan.style.color = "#d97706";

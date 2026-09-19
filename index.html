@@ -101,13 +101,17 @@
             let pendingCount = 0;
 
             students.forEach((student, index) => {
-                let isApproved = student.status === 'تم الدفع ومعتمد ✓';
+                let isApproved = student.status === 'تم الدفع ومعتمد ✓' || student.isApproved;
                 if (isApproved) approvedCount++;
                 else pendingCount++;
 
-                let receiptContent = student.fileImage ? 
-                    `<img src="${student.fileImage}" class="receipt-img" onclick="window.open('${student.fileImage}', '_blank')" title="اضغط لتكبير الصورة">` : 
-                    '<span style="color: #9ca3af; font-size: 11px;">بدون إيصال</span>';
+                // معالجة عرض وتفتيح صورة الإيصال بشكل صحيح ومضمون
+                let receiptContent = '<span style="color: #9ca3af; font-size: 11px;">بدون إيصال</span>';
+                if (student.fileImage) {
+                    receiptContent = `<img src="${student.fileImage}" class="receipt-img" onclick="openImageModal('${student.fileImage}')" title="اضغط لتكبير الصورة">`;
+                } else if (student.receipt) {
+                    receiptContent = `<img src="${student.receipt}" class="receipt-img" onclick="openImageModal('${student.receipt}')" title="اضغط لتكبير الصورة">`;
+                }
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -157,12 +161,20 @@
             document.getElementById('pendingStudents').innerText = pendingCount;
         }
 
-        // دالة تأكيد الدفع وقبول الطالب
+        // دالة تأكيد الدفع وقبول الطالب مع تسجيل تاريخ الاعتماد الفعلي لتشغيل العداد
         function approveStudent(index) {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             students[index].status = 'تم الدفع ومعتمد ✓';
+            students[index].isApproved = true;
+            students[index].approvalDate = new Date().toISOString(); 
             localStorage.setItem('atharStudents', JSON.stringify(students));
             loadDashboard();
+        }
+
+        // دالة فتح صورة الإيصال في تبويب جديد بشكل مضمون
+        function openImageModal(imgSrc) {
+            let win = window.open();
+            win.document.write(`<html dir="rtl"><head><title>إيصال الدفع</title></head><body style="background:#111;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${imgSrc}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;" /></body></html>`);
         }
 
         // دالة حذف الطالب من اللوحة
@@ -209,7 +221,7 @@
         function sendWhatsAppReport() {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             let total = students.length;
-            let approved = students.filter(s => s.status === 'تم الدفع ومعتمد ✓').length;
+            let approved = students.filter(s => s.status === 'تم الدفع ومعتمد ✓' || s.isApproved).length;
             let pending = total - approved;
 
             let reportText = `📊 *تقرير منصة أثر التعليمية* %0A` +
