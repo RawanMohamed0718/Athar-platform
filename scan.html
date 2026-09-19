@@ -14,7 +14,6 @@
         .info-group span { font-weight: 700; color: #059669; }
         .status-badge { text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 15px; }
         .status-valid { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .status-warning { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .status-expired { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
         .error-msg { text-align: center; color: #dc2626; font-weight: bold; font-size: 15px; padding: 20px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca; }
     </style>
@@ -42,6 +41,9 @@
         }
 
         let studentCode = getQueryParam('code');
+        let paramName = getQueryParam('name');
+        let paramGrade = getQueryParam('grade');
+        let paramCenter = getQueryParam('center');
         let container = document.getElementById('cardContainer');
 
         if (!studentCode) {
@@ -50,27 +52,20 @@
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             let student = students.find(s => s.code === studentCode);
 
-            // لو الطالب مش موجود محلياً (لأن السكان تم من موبايل تاني)، ننشئ له بطاقة افتراضية صحيحة بناءً على الكود لتجنب أي خطأ!
-            if (!student) {
-                student = {
-                    name: "طالب معتمد (منصة أثر)",
-                    grade: "المرحلة الثانوية / العامة",
-                    center: "Sohag - مركز المحافظة",
-                    code: studentCode,
-                    approvalDate: new Date().toISOString(),
-                    isApproved: true
-                };
-            }
+            // لو مش موجود محلياً، نعتمد البيانات القادمة من الرابط مباشرة (الاسم والصف الصحيحين تماماً) بدلاً من جملة "طالب معتمد"
+            let finalName = student ? student.name : (paramName ? decodeURIComponent(paramName) : "طالب غير مسجل");
+            let finalGrade = student ? student.grade : (paramGrade ? decodeURIComponent(paramGrade) : "غير محدد");
+            let finalCenter = student ? student.center : (paramCenter ? decodeURIComponent(paramCenter) : "Sohag");
+            let approvalDate = new Date(student && student.approvalDate ? student.approvalDate : Date.now());
 
-            document.getElementById('sName').innerText = student.name;
-            document.getElementById('sGrade').innerText = student.grade;
-            document.getElementById('sCenter').innerText = student.center || 'Sohag';
-            document.getElementById('sCode').innerText = student.code;
+            document.getElementById('sName').innerText = finalName;
+            document.getElementById('sGrade').innerText = finalGrade;
+            document.getElementById('sCenter').innerText = finalCenter;
+            document.getElementById('sCode').innerText = studentCode;
 
             let alertBox = document.getElementById('statusAlert');
             let daysLeftSpan = document.getElementById('sDaysLeft');
 
-            let approvalDate = new Date(student.approvalDate || Date.now());
             let currentDate = new Date();
             let diffDays = Math.floor((currentDate - approvalDate) / (1000 * 60 * 60 * 24));
             let daysLeft = 30 - diffDays;

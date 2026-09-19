@@ -122,12 +122,15 @@
                 `;
                 tbody.appendChild(tr);
 
-                // توليد باركود نظيف وسريع برابط الكود فقط
+                // تمرير كود الطالب واسمه وصفه في الرابط لضمان ظهوره بدقة على أي جهاز خارجي
                 setTimeout(() => {
                     let qrContainer = document.getElementById(`qr_${index}`);
                     if (qrContainer && qrContainer.childElementCount === 0) {
                         let baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
-                        let scanUrl = `${baseUrl}scan.html?code=${student.code}`;
+                        let encodedName = encodeURIComponent(student.name || 'طالب منصة أثر');
+                        let encodedGrade = encodeURIComponent(student.grade || 'غير محدد');
+                        let encodedCenter = encodeURIComponent(student.center || 'Sohag');
+                        let scanUrl = `${baseUrl}scan.html?code=${student.code}&name=${encodedName}&grade=${encodedGrade}&center=${encodedCenter}`;
 
                         let qr = new QRCode(qrContainer, {
                             text: scanUrl,
