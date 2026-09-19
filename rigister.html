@@ -92,11 +92,8 @@
             <div class="success-icon">✅</div>
             <h3 style="color: #065f46; margin-bottom: 8px;">تم تسجيل بياناتك بنجاح!</h3>
             <p style="font-size: 13px; color: #4b5563; line-height: 1.5; margin-bottom: 10px;">
-                احتفظ بهذا الكود أو التقط صورة (Screenshot) لـ QR Code لعرضه عند المعلم أو المكتبة:
+                تم تسجيل بياناتك بنجاح في مبادرة أثر. توجه إلى إدارة المكتبة أو المسؤول لاستلام الكارنيه الخاص بك.
             </p>
-            <!-- مكان عرض الـ QR Code -->
-            <div id="qrcode"></div>
-            <p id="studentCodeDisplay" style="font-weight: bold; color: #064e3b; font-size: 15px; margin-top: 8px;"></p>
         </div>
     </div>
 
@@ -125,61 +122,56 @@
         var paymentMethod = document.getElementById('paymentMethod').value;
         var transactionId = document.getElementById('transactionId').value;
         var receiptFile = document.getElementById('receiptImage').files[0];
+        var proofFile = document.getElementById('proofImage').files[0];
         var randomCode = "ATHAR-" + Math.floor(1000 + Math.random() * 9000);
         var statusText = 'تم الدفع - معتمد';
 
-        var reader = new FileReader();
-        reader.readAsDataURL(receiptFile);
-        reader.onload = function () {
+        document.getElementById('submitBtn').innerText = "جاري الإرسال...";
+        document.getElementById('submitBtn').disabled = true;
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) return resolve('');
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        Promise.all([
+            readFileAsDataURL(receiptFile),
+            readFileAsDataURL(proofFile)
+        ]).then(([receiptBase64, proofBase64]) => {
             var dataToSend = {
                 name: name, grade: grade, center: center, phone: phone,
                 financialStatus: studentCase, paymentMethod: paymentMethod,
-                transactionId: transactionId, fileImage: reader.result,
+                transactionId: transactionId, fileImage: receiptBase64,
+                proofImage: proofBase64,
                 code: randomCode, status: statusText,
-                registrationDate: new Date().toISOString() // حفظ تاريخ التسجيل لحساب الـ 30 يوماً بدقة
+                registrationDate: new Date().toISOString()
             };
 
-            // حفظ الطالب محلياً في المتصفح
             let existingStudents = JSON.parse(localStorage.getItem('atharStudents')) || [];
             existingStudents.push(dataToSend);
             localStorage.setItem('atharStudents', JSON.stringify(existingStudents));
 
             var url = "https://script.google.com/macros/s/AKfycbw78cx2hSxbjETWB6icrJ_ijh_8Lv6G29iS_ASZIqBaLbyjx28I4u6GOn_OJYErW16B7w/exec";
 
-            document.getElementById('submitBtn').innerText = "جاري الإرسال...";
-            document.getElementById('submitBtn').disabled = true;
-
-            // إرسال البيانات لجوجل شيت بدون حجب
-            fetch(url, {
+            return fetch(url, {
                 method: "POST", mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dataToSend)
-            })
-            .then(() => {
-                document.getElementById('registrationForm').style.display = 'none';
-                document.getElementById('resultCard').style.display = 'block';
-
-                document.getElementById('studentCodeDisplay').innerText = "كود الطالب: " + randomCode;
-
-                var scanUrl = window.location.origin + window.location.pathname.replace(/register\.html|rigister\.html|index\.html/, 'scan.html') + "?code=" + randomCode;
-
-                document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), {
-                    text: scanUrl,
-                    width: 140,
-                    height: 140,
-                    colorDark : "#064e3b",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            })
-            .catch(error => {
-                console.error('Error!', error);
-                alert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.");
-                document.getElementById('submitBtn').innerText = "تأكيد وإرسال البيانات";
-                document.getElementById('submitBtn').disabled = false;
             });
-        };
+        }).then(() => {
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('resultCard').style.display = 'block';
+        }).catch(error => {
+            console.error('Error!', error);
+            alert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.");
+            document.getElementById('submitBtn').innerText = "تأكيد وإرسال البيانات";
+            document.getElementById('submitBtn').disabled = false;
+        });
     });
     </script>
 </body>

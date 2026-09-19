@@ -93,15 +93,6 @@
     <script>
         function loadDashboard() {
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
-            
-            // بيانات تجريبية لو الجدول فاضي
-            if (students.length === 0) {
-                students = [
-                    { name: 'محمد أحمد محمود', grade: 'الصف الأول الثانوي', center: 'سوهاج', phone: '01012345678', financialStatus: 'طالب مقتدر', code: 'ATHAR-5833', status: 'قيد المراجعة', fileImage: '', registrationDate: new Date().toISOString() },
-                    { name: 'فاطمة علي حسن', grade: 'الصف الثاني الثانوي', center: 'أخميم', phone: '01198765432', financialStatus: 'طالب غير مقتدر', code: 'ATHAR-1495', status: 'قيد المراجعة', fileImage: '', registrationDate: new Date().toISOString() }
-                ];
-                localStorage.setItem('atharStudents', JSON.stringify(students));
-            }
 
             let tbody = document.getElementById('studentsTableBody');
             tbody.innerHTML = '';
