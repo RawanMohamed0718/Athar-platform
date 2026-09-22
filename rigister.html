@@ -9,7 +9,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { 
             background-color: #070707;
-            /* خلفية هيروغليفية فرعونية مرسومة ومضمونة الظهور في المساحات الفارغة */
             background-image: url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.08'%3E%3Ctext x='15' y='35' font-size='22'%3E𓋹 𓁹 𓊖%3E%3C/text%3E%3Ctext x='95' y='35' font-size='22'%3E𓏏 𓆣 𓃭%3E%3C/text%3E%3Ctext x='15' y='85' font-size='22'%3E𓍝 𓤎 𓎛%3E%3C/text%3E%3Ctext x='95' y='85' font-size='22'%3E𓂋 𓈖 𓂻%3E%3C/text%3E%3Ctext x='15' y='135' font-size='22'%3E𓅓 𓃀 𓆑%3E%3C/text%3E%3Ctext x='95' y='135' font-size='22'%3E𓈙 𓋴 𓍯%3E%3C/text%3E%3Ctext x='15' y='175' font-size='22'%3E𓎡 𓏠 𓐍%3E%3C/text%3E%3Ctext x='95' y='175' font-size='22'%3E𓃒 𓃗 𓂝%3E%3C/text%3E%3C/g%3E%3C/svg%3E");
             color: #f3f4f6; 
             min-height: 100vh; 
@@ -17,7 +16,6 @@
             justify-content: center; 
             align-items: center; 
             padding: 20px;
-            position: relative;
         }
         .form-container { 
             background: rgba(14, 14, 14, 0.96); 
@@ -27,8 +25,6 @@
             padding: 35px; 
             border-radius: 20px; 
             box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25); 
-            position: relative; 
-            z-index: 1;
         }
         .header-title { 
             font-size: 23px; 
@@ -76,39 +72,50 @@
         }
         .success-box { 
             display: none; 
-            background: rgba(6, 78, 59, 0.9); 
-            border: 1px solid #10b981; 
-            color: #d1fae5; 
-            padding: 15px; 
-            border-radius: 10px; 
             text-align: center; 
-            margin-top: 20px; 
-            font-weight: bold; 
+            padding: 20px 10px;
         }
+        .success-box .icon { font-size: 45px; margin-bottom: 10px; }
+        .success-box h3 { color: #d4af37; font-size: 20px; margin-bottom: 10px; }
+        .success-box p { color: #e5e7eb; font-size: 14px; line-height: 1.6; }
     </style>
 </head>
 <body>
 
     <div class="form-container">
-        <div class="header-title">🏛️ تسجيل طالب جديد - مبادرة أثر</div>
+        <div class="header-title">🏛️ تسجيل طالب جديد - منصة أثر</div>
+        
         <form id="studentForm" onsubmit="registerStudent(event)">
             <div class="form-group">
                 <label>اسم الطالب الرباعي:</label>
                 <input type="text" id="name" required placeholder="أدخل اسم الطالب كاملاً">
             </div>
+            
             <div class="form-group">
                 <label>الصف الدراسي:</label>
                 <select id="grade" required>
                     <option value="">اختر الصف الدراسي</option>
-                    <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                    <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                    <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                    <optgroup label="المرحلة الإعدادية">
+                        <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+                        <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+                        <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+                    </optgroup>
+                    <optgroup label="المرحلة الثانوية">
+                        <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                        <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                        <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                    </optgroup>
+                    <optgroup label="المرحلة الجامعية">
+                        <option value="طالب جامعي">طالب جامعي</option>
+                    </optgroup>
                 </select>
             </div>
+
             <div class="form-group">
                 <label>المركز / المحافظة:</label>
                 <input type="text" id="center" required placeholder="مثال: سوهاج، أخميم، طهطا...">
             </div>
+            
             <div class="form-group">
                 <label>رقم الهاتف للتواصل:</label>
                 <input type="tel" id="phone" required placeholder="رقم الهاتف">
@@ -147,23 +154,28 @@
 
             <button type="submit" class="btn-submit">إرسال طلب التسجيل 🪶</button>
         </form>
-        <div id="successMsg" class="success-box">تم تسجيل بياناتك بنجاح يا فندم! انتظر المراجعة والتفعيل.</div>
+
+        <div id="successMsg" class="success-box">
+            <div class="icon">🏛️✨</div>
+            <h3>شكرا! تم تسجيلك بنجاح</h3>
+            <p>
+                تم حفظ بياناتك وإرسالها مباشرة لوحة تحكم المسؤول.
+                <br><br>
+                <strong style="color: #d4af37; font-size: 16px;" id="assignedCode"></strong>
+                <br><br>
+                <!-- تم إزالة الباركود نهائياً من هنا بناءً على طلبك -->
+            </p>
+        </div>
     </div>
 
     <script>
         function toggleProofField() {
             let status = document.getElementById('financialStatus').value;
             let proofGroup = document.getElementById('proofGroup');
-            if (status === 'غير مقتدر') {
-                proofGroup.style.display = 'block';
-                document.getElementById('proofFile').required = true;
-            } else {
-                proofGroup.style.display = 'none';
-                document.getElementById('proofFile').required = false;
-            }
+            proofGroup.style.display = (status === 'غير مقتدر') ? 'block' : 'none';
         }
 
-        function registerStudent(e) {
+        async function registerStudent(e) {
             e.preventDefault();
             let name = document.getElementById('name').value;
             let grade = document.getElementById('grade').value;
@@ -173,49 +185,34 @@
             let paymentMethod = document.getElementById('paymentMethod').value;
             let senderPhone = document.getElementById('senderPhone').value;
             let fileInput = document.getElementById('receiptFile');
-            let proofInput = document.getElementById('proofFile');
 
             let reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = async function(event) {
                 let base64Image = event.target.result;
+                let studentCode = 'ATHAR-' + Math.floor(1000 + Math.random() * 9000);
                 
-                let readerProof = new FileReader();
-                readerProof.onload = function(eventProof) {
-                    let base64Proof = proofInput.files[0] ? eventProof.target.result : '';
-                    
-                    let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
-                    
-                    let newStudent = {
-                        name: name,
-                        grade: grade,
-                        center: center,
-                        phone: phone,
-                        financialStatus: financialStatus,
-                        paymentMethod: paymentMethod,
-                        senderPhone: senderPhone,
-                        fileImage: base64Image,
-                        proofImage: base64Proof,
-                        code: 'ATHAR-' + Math.floor(1000 + Math.random() * 9000),
-                        status: 'قيد المراجعة',
-                        isApproved: false,
-                        date: new Date().toLocaleDateString('ar-EG')
-                    };
-
-                    students.push(newStudent);
-                    localStorage.setItem('atharStudents', JSON.stringify(students));
-
-                    document.getElementById('studentForm').reset();
-                    toggleProofField();
-                    let msg = document.getElementById('successMsg');
-                    msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+                let newStudent = {
+                    id: Date.now(),
+                    name: name,
+                    grade: grade,
+                    center: center,
+                    phone: phone,
+                    financialStatus: financialStatus,
+                    paymentMethod: paymentMethod,
+                    senderPhone: senderPhone,
+                    fileImage: base64Image,
+                    code: studentCode,
+                    status: 'قيد المراجعة',
+                    date: new Date().toLocaleDateString('ar-EG')
                 };
 
-                if(proofInput.files[0]) {
-                    readerProof.readAsDataURL(proofInput.files[0]);
-                } else {
-                    readerProof.onload({ target: { result: '' } });
-                }
+                let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+                students.push(newStudent);
+                localStorage.setItem('atharStudents', JSON.stringify(students));
+
+                document.getElementById('studentForm').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('assignedCode').innerText = "كود الطالب: " + studentCode;
             };
 
             if(fileInput.files[0]) {

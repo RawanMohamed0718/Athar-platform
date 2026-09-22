@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المسؤول - منصة أثر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { 
+            background-color: #070707;
+            background-image: url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.08'%3E%3Ctext x='15' y='35' font-size='22'%3E𓋹 𓁹 𓊖%3E%3C/text%3E%3Ctext x='95' y='35' font-size='22'%3E𓏏 𓆣 𓃭%3E%3C/text%3E%3Ctext x='15' y='85' font-size='22'%3E𓍝 𓤎 𓎛%3E%3C/text%3E%3Ctext x='95' y='85' font-size='22'%3E𓂋 𓈖 𓂻%3E%3C/text%3E%3Ctext x='15' y='135' font-size='22'%3E𓅓 𓃀 𓆑%3E%3C/text%3E%3Ctext x='95' y='135' font-size='22'%3E𓈙 𓋴 𓍯%3E%3C/text%3E%3Ctext x='15' y='175' font-size='22'%3E𓎡 𓏠 𓐍%3E%3C/text%3E%3Ctext x='95' y='175' font-size='22'%3E𓃒 𓃗 𓂝%3E%3C/text%3E%3C/g%3E%3C/svg%3E");
+            color: #f3f4f6; 
+            min-height: 100vh; 
+            padding: 30px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(14, 14, 14, 0.95); 
+            border: 2px solid #d4af37; 
+            padding: 20px 30px; 
+            border-radius: 15px; 
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 { color: #d4af37; font-size: 24px; }
+        .stats { 
+            background: rgba(212, 175, 55, 0.1); 
+            border: 1px solid #d4af37; 
+            padding: 10px 20px; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            color: #eab308; 
+        }
+        .table-container { 
+            background: rgba(14, 14, 14, 0.95); 
+            border: 1px solid #4b5563; 
+            border-radius: 15px; 
+            overflow-x: auto; 
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 900px; }
+        th, td { padding: 14px; border-bottom: 1px solid #27272a; font-size: 14px; }
+        th { color: #d4af37; font-weight: 700; background: rgba(212, 175, 55, 0.05); }
+        tr:hover { background: rgba(255, 255, 255, 0.02); }
+        .badge { 
+            padding: 5px 10px; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            display: inline-block;
+        }
+        .badge-pending { background: #ca8a04; color: #000; }
+        .badge-accepted { background: #16a34a; color: #fff; }
+        .btn-action { 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 12px; 
+            margin-left: 5px; 
+            transition: 0.2s;
+        }
+        .btn-accept { background: #22c55e; color: #000; }
+        .btn-accept:hover { background: #16a34a; }
+        .btn-delete { background: #ef4444; color: #fff; }
+        .btn-delete:hover { background: #dc2626; }
+        .receipt-thumb { 
+            width: 45px; 
+            height: 45px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            border: 1px solid #d4af37; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .receipt-thumb:hover { transform: scale(1.1); }
+        .empty-msg { text-align: center; padding: 40px; color: #9ca3af; font-size: 16px; }
+        
+        /* Modal لعرض الصورة المكبرة */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center;
+        }
+        .modal img { max-width: 90%; max-height: 90%; border: 2px solid #d4af37; border-radius: 10px; }
+        .close-modal { position: absolute; top: 20px; left: 30px; color: #fff; font-size: 35px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ لوحة تحكم المسؤول - منصة أثر</h1>
+            <div class="stats" id="totalCount">إجمالي الطلاب المسجلين: 0</div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الكود</th>
+                        <th>اسم الطالب</th>
+                        <th>الصف الدراسي</th>
+                        <th>المركز</th>
+                        <th>الهاتف</th>
+                        <th>الحالة / الدفع</th>
+                        <th>الإيصال</th>
+                        <th>التاريخ</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- سيتم تعبئة البيانات تلقائياً -->
+                </tbody>
+            </table>
+            <div id="emptyState" class="empty-msg" style="display: none;">لا توجد تسجيلاّت حتى الآن.</div>
+        </div>
+    </div>
+
+    <!-- نافذة الصورة المكبرة -->
+    <div id="imgModal" class="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img id="modalImg" src="">
+    </div>
+
+    <script>
+        function loadStudents() {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            let tbody = document.getElementById('studentsTableBody');
+            let emptyState = document.getElementById('emptyState');
+            let totalCount = document.getElementById('totalCount');
+
+            tbody.innerHTML = "";
+            totalCount.innerText = "إجمالي الطلاب المسجلين: " + students.length;
+
+            if (students.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            students.forEach((student, index) => {
+                let tr = document.createElement('tr');
+                
+                let statusBadge = student.status === 'مقبول' 
+                    ? `<span class="badge badge-accepted">مقبول</span>` 
+                    : `<span class="badge badge-pending">قيد المراجعة</span>`;
+
+                tr.innerHTML = `
+                    <td style="color: #d4af37; font-weight: 700;">${student.code || '---'}</td>
+                    <td>${student.name}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.center}</td>
+                    <td><a href="tel:${student.phone}" style="color: #60a5fa; text-decoration: none;">${student.phone}</a></td>
+                    <td>
+                        ${statusBadge}<br>
+                        <small style="color: #9ca3af;">${student.paymentMethod} (${student.senderPhone})</small>
+                    </td>
+                    <td>
+                        ${student.fileImage ? `<img src="${student.fileImage}" class="receipt-thumb" onclick="showModal('${student.fileImage}')">` : 'لا يوجد'}
+                    </td>
+                    <td>${student.date || '---'}</td>
+                    <td>
+                        <button class="btn-action btn-accept" onclick="toggleStatus(${index})">تبديل الحالة</button>
+                        <button class="btn-action btn-delete" onclick="deleteStudent(${index})">حذف</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleStatus(index) {
+            let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+            students[index].status = students[index].status === 'مقبول' ? 'قيد المراجعة' : 'مقبول';
+            localStorage.setItem('atharStudents', JSON.stringify(students));
+            loadStudents();
+        }
+
+        function deleteStudent(index) {
+            if(confirm('هل أنت متأكد من حذف هذا التسجيل؟')) {
+                let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+                students.splice(index, 1);
+                localStorage.setItem('atharStudents', JSON.stringify(students));
+                loadStudents();
+            }
+        }
+
+        function showModal(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imgModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('imgModal').style.display = 'none';
+        }
+
+        // تحميل البيانات أول ما الصفحة تفتح
+        window.onload = loadStudents;
+    </script>
+</body>
+</html>
