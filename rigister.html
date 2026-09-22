@@ -3,176 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة أثر التعليمية - تسجيل الطلاب</title>
+    <title>منصة أثر التعليمية - تسجيل طالب جديد</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- مكتبة توليد الـ QR Code -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background: linear-gradient(135deg, #064e3b, #022c22, #111827); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { background: #ffffff; width: 100%; max-width: 500px; padding: 35px 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; border-top: 5px solid #d97706; }
-        .logo-title { font-size: 26px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 5px; }
-        .subtitle { font-size: 13px; color: #d97706; text-align: center; margin-bottom: 25px; font-weight: 600; }
+        body { 
+            background-color: #070707;
+            /* خلفية هيروغليفية فرعونية مرسومة ومضمونة الظهور في المساحات الفارغة */
+            background-image: url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.08'%3E%3Ctext x='15' y='35' font-size='22'%3E𓋹 𓁹 𓊖%3E%3C/text%3E%3Ctext x='95' y='35' font-size='22'%3E𓏏 𓆣 𓃭%3E%3C/text%3E%3Ctext x='15' y='85' font-size='22'%3E𓍝 𓤎 𓎛%3E%3C/text%3E%3Ctext x='95' y='85' font-size='22'%3E𓂋 𓈖 𓂻%3E%3C/text%3E%3Ctext x='15' y='135' font-size='22'%3E𓅓 𓃀 𓆑%3E%3C/text%3E%3Ctext x='95' y='135' font-size='22'%3E𓈙 𓋴 𓍯%3E%3C/text%3E%3Ctext x='15' y='175' font-size='22'%3E𓎡 𓏠 𓐍%3E%3C/text%3E%3Ctext x='95' y='175' font-size='22'%3E𓃒 𓃗 𓂝%3E%3C/text%3E%3C/g%3E%3C/svg%3E");
+            color: #f3f4f6; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+            position: relative;
+        }
+        .form-container { 
+            background: rgba(14, 14, 14, 0.96); 
+            border: 2px solid #d4af37; 
+            width: 100%; 
+            max-width: 520px; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25); 
+            position: relative; 
+            z-index: 1;
+        }
+        .header-title { 
+            font-size: 23px; 
+            font-weight: 700; 
+            color: #d4af37; 
+            text-align: center; 
+            margin-bottom: 25px; 
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3); 
+            padding-bottom: 15px; 
+        }
         .form-group { margin-bottom: 18px; }
-        label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-        input, select { width: 100%; padding: 11px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.3s ease; }
-        input:focus, select:focus { border-color: #059669; }
-        .note { font-size: 11px; color: #dc2626; margin-top: 4px; }
-        button { width: 100%; background: linear-gradient(135deg, #059669, #047857); color: white; padding: 13px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.3s ease; margin-top: 10px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
-        button:hover { opacity: 0.9; }
-        #resultCard { display: none; text-align: center; padding: 25px 20px; background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; margin-top: 15px; }
-        .success-icon { font-size: 40px; color: #059669; margin-bottom: 10px; }
-        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #e5e7eb; font-size: 14px; }
+        input, select { 
+            width: 100%; 
+            padding: 12px 15px; 
+            background: #111; 
+            border: 1px solid #4b5563; 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: 14px; 
+            transition: 0.3s;
+        }
+        input:focus, select:focus { 
+            border-color: #d4af37; 
+            outline: none; 
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); 
+        }
+        .btn-submit { 
+            width: 100%; 
+            background: linear-gradient(135deg, #d4af37, #b45309); 
+            color: #000; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            font-size: 16px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 10px; 
+        }
+        .btn-submit:hover { 
+            background: linear-gradient(135deg, #eab308, #d97706); 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(234, 179, 8, 0.3);
+        }
+        .success-box { 
+            display: none; 
+            background: rgba(6, 78, 59, 0.9); 
+            border: 1px solid #10b981; 
+            color: #d1fae5; 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-top: 20px; 
+            font-weight: bold; 
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="logo-title">منصة أثر التعليمية</h1>
-        <p class="subtitle">بوابة تسجيل الطلاب وتأكيد الاشتراكات والمبادرات</p>
 
-        <form id="registrationForm">
+    <div class="form-container">
+        <div class="header-title">🏛️ تسجيل طالب جديد - مبادرة أثر</div>
+        <form id="studentForm" onsubmit="registerStudent(event)">
             <div class="form-group">
-                <label for="name">الاسم الثلاثي:</label>
-                <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
+                <label>اسم الطالب الرباعي:</label>
+                <input type="text" id="name" required placeholder="أدخل اسم الطالب كاملاً">
             </div>
             <div class="form-group">
-                <label for="grade">الصف الدراسي:</label>
-                <input type="text" id="grade" placeholder="مثال: الصف الثالث الثانوي" required>
+                <label>الصف الدراسي:</label>
+                <select id="grade" required>
+                    <option value="">اختر الصف الدراسي</option>
+                    <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                    <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                    <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="center">المركز / المحافظة:</label>
-                <input type="text" id="center" placeholder="مثال: أخميم - سوهاج" required>
+                <label>المركز / المحافظة:</label>
+                <input type="text" id="center" required placeholder="مثال: سوهاج، أخميم، طهطا...">
             </div>
             <div class="form-group">
-                <label for="phone">رقم الهاتف (الواتساب):</label>
-                <input type="tel" id="phone" placeholder="01XXXXXXXXX" required>
+                <label>رقم الهاتف للتواصل:</label>
+                <input type="tel" id="phone" required placeholder="رقم الهاتف">
             </div>
+
             <div class="form-group">
-                <label for="studentCase">الحالة المالية / الاشتراك:</label>
-                <select id="studentCase" required onchange="toggleExemptField()">
-                    <option value="">اختر الحالة</option>
-                    <option value="طالب مقتدر">طالب مقتدر</option>
-                    <option value="طالب غير مقتدر">طالب غير مقتدر</option>
+                <label>الحالة المالية:</label>
+                <select id="financialStatus" onchange="toggleProofField()" required>
+                    <option value="مقتدر">مقتدر</option>
+                    <option value="غير مقتدر">غير مقتدر</option>
                 </select>
             </div>
 
-            <!-- قسم بيانات الدفع الأساسي -->
-            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 15px;">
-                <div class="form-group">
-                    <label for="paymentMethod">طريقة الدفع:</label>
-                    <select id="paymentMethod" required>
-                        <option value="">اختر طريقة الدفع</option>
-                        <option value="Vodafone Cash">فودافون كاش</option>
-                        <option value="InstaPay">إنستا باي (InstaPay)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="transactionId">رقم التحويل (الرقم الذي تم التحويل منه):</label>
-                    <input type="text" id="transactionId" placeholder="اكتب رقم العملية أو الرقم المحول منه" required>
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="receiptImage">صورة إيصال الدفع (سكرين شوت):</label>
-                    <input type="file" id="receiptImage" accept="image/*" required>
-                </div>
+            <div class="form-group" id="proofGroup" style="display: none;">
+                <label>رفع إثبات الحالة (بحث اجتماعي أو مستند معتمد):</label>
+                <input type="file" id="proofFile" accept="image/*,.pdf">
             </div>
 
-            <!-- قسم إثبات الحالة -->
-            <div id="exemptSection" style="display: none; background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 15px;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="proofImage">صورة إثبات الحالة (مستند رسمي / شهادة وفاة، إلخ):</label>
-                    <input type="file" id="proofImage" accept="image/*">
-                    <p class="note">يرجى إرفاق صورة واضحة للمستند لمراجعته من الإدارة وقبول الحالة</p>
-                </div>
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <select id="paymentMethod" required>
+                    <option value="فودافون كاش">فودافون كاش</option>
+                    <option value="إنستا باي (InstaPay)">إنستا باي (InstaPay)</option>
+                </select>
             </div>
 
-            <button type="submit" id="submitBtn">تأكيد وإرسال البيانات</button>
+            <div class="form-group">
+                <label>رقم الهاتف المحول منه (أو الحساب):</label>
+                <input type="text" id="senderPhone" required placeholder="اكتب رقم الهاتف أو الحساب الذي تم التحويل منه">
+            </div>
+
+            <div class="form-group">
+                <label>صورة إيصال الدفع:</label>
+                <input type="file" id="receiptFile" accept="image/*" required>
+            </div>
+
+            <button type="submit" class="btn-submit">إرسال طلب التسجيل 🪶</button>
         </form>
-
-        <div id="resultCard">
-            <div class="success-icon">✅</div>
-            <h3 style="color: #065f46; margin-bottom: 8px;">تم تسجيل بياناتك بنجاح!</h3>
-            <p style="font-size: 13px; color: #4b5563; line-height: 1.5; margin-bottom: 10px;">
-                تم تسجيل بياناتك بنجاح في مبادرة أثر. توجه إلى إدارة المكتبة أو المسؤول لاستلام الكارنيه الخاص بك.
-            </p>
-        </div>
+        <div id="successMsg" class="success-box">تم تسجيل بياناتك بنجاح يا فندم! انتظر المراجعة والتفعيل.</div>
     </div>
 
     <script>
-    function toggleExemptField() {
-        var studentCase = document.getElementById('studentCase').value;
-        var exemptSec = document.getElementById('exemptSection');
-        var proofInput = document.getElementById('proofImage');
-
-        if (studentCase === 'طالب غير مقتدر') {
-            exemptSec.style.display = 'block';
-            proofInput.required = true;
-        } else {
-            exemptSec.style.display = 'none';
-            proofInput.required = false;
-        }
-    }
-
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var name = document.getElementById('name').value;
-        var grade = document.getElementById('grade').value;
-        var center = document.getElementById('center').value;
-        var phone = document.getElementById('phone').value;
-        var studentCase = document.getElementById('studentCase').value;
-        var paymentMethod = document.getElementById('paymentMethod').value;
-        var transactionId = document.getElementById('transactionId').value;
-        var receiptFile = document.getElementById('receiptImage').files[0];
-        var proofFile = document.getElementById('proofImage').files[0];
-        var randomCode = "ATHAR-" + Math.floor(1000 + Math.random() * 9000);
-        var statusText = 'تم الدفع - معتمد';
-
-        document.getElementById('submitBtn').innerText = "جاري الإرسال...";
-        document.getElementById('submitBtn').disabled = true;
-
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                if (!file) return resolve('');
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-                reader.readAsDataURL(file);
-            });
+        function toggleProofField() {
+            let status = document.getElementById('financialStatus').value;
+            let proofGroup = document.getElementById('proofGroup');
+            if (status === 'غير مقتدر') {
+                proofGroup.style.display = 'block';
+                document.getElementById('proofFile').required = true;
+            } else {
+                proofGroup.style.display = 'none';
+                document.getElementById('proofFile').required = false;
+            }
         }
 
-        Promise.all([
-            readFileAsDataURL(receiptFile),
-            readFileAsDataURL(proofFile)
-        ]).then(([receiptBase64, proofBase64]) => {
-            var dataToSend = {
-                name: name, grade: grade, center: center, phone: phone,
-                financialStatus: studentCase, paymentMethod: paymentMethod,
-                transactionId: transactionId, fileImage: receiptBase64,
-                proofImage: proofBase64,
-                code: randomCode, status: statusText,
-                registrationDate: new Date().toISOString()
+        function registerStudent(e) {
+            e.preventDefault();
+            let name = document.getElementById('name').value;
+            let grade = document.getElementById('grade').value;
+            let center = document.getElementById('center').value;
+            let phone = document.getElementById('phone').value;
+            let financialStatus = document.getElementById('financialStatus').value;
+            let paymentMethod = document.getElementById('paymentMethod').value;
+            let senderPhone = document.getElementById('senderPhone').value;
+            let fileInput = document.getElementById('receiptFile');
+            let proofInput = document.getElementById('proofFile');
+
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let base64Image = event.target.result;
+                
+                let readerProof = new FileReader();
+                readerProof.onload = function(eventProof) {
+                    let base64Proof = proofInput.files[0] ? eventProof.target.result : '';
+                    
+                    let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
+                    
+                    let newStudent = {
+                        name: name,
+                        grade: grade,
+                        center: center,
+                        phone: phone,
+                        financialStatus: financialStatus,
+                        paymentMethod: paymentMethod,
+                        senderPhone: senderPhone,
+                        fileImage: base64Image,
+                        proofImage: base64Proof,
+                        code: 'ATHAR-' + Math.floor(1000 + Math.random() * 9000),
+                        status: 'قيد المراجعة',
+                        isApproved: false,
+                        date: new Date().toLocaleDateString('ar-EG')
+                    };
+
+                    students.push(newStudent);
+                    localStorage.setItem('atharStudents', JSON.stringify(students));
+
+                    document.getElementById('studentForm').reset();
+                    toggleProofField();
+                    let msg = document.getElementById('successMsg');
+                    msg.style.display = 'block';
+                    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+                };
+
+                if(proofInput.files[0]) {
+                    readerProof.readAsDataURL(proofInput.files[0]);
+                } else {
+                    readerProof.onload({ target: { result: '' } });
+                }
             };
 
-            let existingStudents = JSON.parse(localStorage.getItem('atharStudents')) || [];
-            existingStudents.push(dataToSend);
-            localStorage.setItem('atharStudents', JSON.stringify(existingStudents));
-
-            var url = "https://script.google.com/macros/s/AKfycbw78cx2hSxbjETWB6icrJ_ijh_8Lv6G29iS_ASZIqBaLbyjx28I4u6GOn_OJYErW16B7w/exec";
-
-            return fetch(url, {
-                method: "POST", mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend)
-            });
-        }).then(() => {
-            document.getElementById('registrationForm').style.display = 'none';
-            document.getElementById('resultCard').style.display = 'block';
-        }).catch(error => {
-            console.error('Error!', error);
-            alert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.");
-            document.getElementById('submitBtn').innerText = "تأكيد وإرسال البيانات";
-            document.getElementById('submitBtn').disabled = false;
-        });
-    });
+            if(fileInput.files[0]) {
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
     </script>
 </body>
 </html>

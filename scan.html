@@ -7,21 +7,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background: linear-gradient(135deg, #064e3b, #022c22, #111827); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: #ffffff; width: 100%; max-width: 450px; padding: 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: right; }
-        .header-title { font-size: 20px; font-weight: 700; color: #064e3b; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
-        .info-group { margin-bottom: 14px; font-size: 14px; color: #374151; background: #f9fafb; padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e7eb; }
-        .info-group span { font-weight: 700; color: #059669; }
-        .status-badge { text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 15px; }
-        .status-valid { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .status-expired { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-        .error-msg { text-align: center; color: #dc2626; font-weight: bold; font-size: 15px; padding: 20px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca; }
+        body { 
+            background: linear-gradient(135deg, #0a0a0a, #1a150b, #000); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        .card { 
+            background: rgba(18, 18, 18, 0.95); 
+            border: 2px solid #d4af37; 
+            width: 100%; 
+            max-width: 450px; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2); 
+            text-align: right; 
+        }
+        .header-title { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #d4af37; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3); 
+            padding-bottom: 12px; 
+        }
+        .info-group { 
+            margin-bottom: 14px; 
+            font-size: 14px; 
+            color: #e5e7eb; 
+            background: #161616; 
+            padding: 10px 14px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(212, 175, 55, 0.2); 
+        }
+        .info-group span { font-weight: 700; color: #d4af37; }
+        .status-badge { text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 15px; }
+        .status-valid { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+        .status-expired { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; }
+        .error-msg { text-align: center; color: #ef4444; font-weight: bold; font-size: 15px; padding: 20px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
 
     <div class="card" id="cardContainer">
-        <div class="header-title">بطاقة التحقق - منصة أثر</div>
+        <div class="header-title">🏛️ بطاقة التحقق - منصة أثر</div>
         <div id="studentDetails">
             <div class="info-group">اسم الطالب: <span id="sName">-</span></div>
             <div class="info-group">الصف الدراسي: <span id="sGrade">-</span></div>
@@ -52,10 +84,9 @@
             let students = JSON.parse(localStorage.getItem('atharStudents')) || [];
             let student = students.find(s => s.code === studentCode);
 
-            // لو مش موجود محلياً، نعتمد البيانات القادمة من الرابط مباشرة (الاسم والصف الصحيحين تماماً) بدلاً من جملة "طالب معتمد"
             let finalName = student ? student.name : (paramName ? decodeURIComponent(paramName) : "طالب غير مسجل");
             let finalGrade = student ? student.grade : (paramGrade ? decodeURIComponent(paramGrade) : "غير محدد");
-            let finalCenter = student ? student.center : (paramCenter ? decodeURIComponent(paramCenter) : "Sohag");
+            let finalCenter = student ? student.center : (paramCenter ? decodeURIComponent(paramCenter) : "سوهاج");
             let approvalDate = new Date(student && student.approvalDate ? student.approvalDate : Date.now());
 
             document.getElementById('sName').innerText = finalName;
@@ -74,12 +105,12 @@
 
             if (daysLeft >= 0) {
                 daysLeftSpan.innerText = daysLeft + " يوم متبقي";
-                daysLeftSpan.style.color = "#059669";
+                daysLeftSpan.style.color = "#10b981";
                 alertBox.className = "status-badge status-valid";
                 alertBox.innerText = "✅ اشتراك الكارنيه ساري ومفعل بنجاح";
             } else {
                 daysLeftSpan.innerText = "انتهت الصلاحية";
-                daysLeftSpan.style.color = "#991b1b";
+                daysLeftSpan.style.color = "#ef4444";
                 alertBox.className = "status-badge status-expired";
                 alertBox.innerText = "❌ انتهت فترة صلاحية هذا الكارنيه.";
             }
